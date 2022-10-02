@@ -27,7 +27,6 @@ const DataBarang = () => {
   // create data
   function handleCreateData() {
     setCreateData(true);
-    console.info(createData);
     return;
   }
   function handleCancelData() {
@@ -62,7 +61,6 @@ const DataBarang = () => {
                 placeholder="Search"
                 onChange={(event) => {
                   setSearchData(event.target.value);
-                  console.info(searchData);
                 }}
               />
             </div>
