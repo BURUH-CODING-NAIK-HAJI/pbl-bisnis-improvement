@@ -1,16 +1,14 @@
 import React, { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { BiSearch } from "react-icons/bi";
 import Sidebar from "../../components/sidebar";
 import axios from "axios";
 import CreateData from "./CreateData";
-import DeleteData from "./DeleteData";
-import EditData from "./EditData";
 
 const DataBarang = () => {
   const [createData, setCreateData] = useState(false);
-  const [editData, setEditData] = useState(false);
-  const [deleteData, setDeleteData] = useState(false);
   const [barang, setBarang] = useState([]);
+  const [searchData, setSearchData] = useState("");
 
   useEffect(() => {
     document.title = "Data Barang";
@@ -26,6 +24,7 @@ const DataBarang = () => {
     setBarang(data);
   }
 
+  // create data
   function handleCreateData() {
     setCreateData(true);
     console.info(createData);
@@ -36,23 +35,15 @@ const DataBarang = () => {
     return;
   }
 
-  function handleEditData() {
-    setEditData(true);
-    return;
-  }
-  function handleCancelDatas() {
-    setEditData(false);
-    return;
-  }
-
-  function handleDelete() {
-    setDeleteData(true);
-    return;
-  }
-  // function handleCancelDelete() {
-  //   setDeleteData(false);
-  //   return;
-  // }
+  // delete barang
+  const deleteBarang = async (id) => {
+    try {
+      await axios.delete(`http://localhost:5000/product/${id}`);
+      getBarang();
+    } catch (error) {
+      console.info(error);
+    }
+  };
 
   const tabelHead = ["No", "Nama Barang", "Jenis", "Jumlah", "Action"];
 
@@ -69,6 +60,10 @@ const DataBarang = () => {
                 type="text"
                 className="flex-1 outline-none w-full"
                 placeholder="Search"
+                onChange={(event) => {
+                  setSearchData(event.target.value);
+                  console.info(searchData);
+                }}
               />
             </div>
             <button
@@ -78,8 +73,6 @@ const DataBarang = () => {
               + Tambah Data
             </button>
             {createData ? <CreateData handleCancel={handleCancelData} /> : null}
-            {editData ? <EditData handleCancel={handleCancelDatas} /> : null}
-            {deleteData ? <DeleteData handleCancel={handleDelete} /> : null}
           </div>
 
           {/* Tabel */}
@@ -101,41 +94,55 @@ const DataBarang = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {barang.map((item, index) => {
-                  return (
-                    <tr key={index}>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        {index + 1}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        {item.nama_barang}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        {item.jenis}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-center">
-                        {item.jumlah}
-                      </td>
+                {barang
+                  .filter((val) => {
+                    if (searchData === "") {
+                      return val;
+                    } else if (
+                      val.nama_barang
+                        .toLowerCase()
+                        .includes(searchData.toLowerCase())
+                    ) {
+                      return val;
+                    }
+                  })
+                  .map((item, index) => {
+                    return (
+                      <tr key={index}>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          {index + 1}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          {item.nama_barang}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          {item.jenis}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-center">
+                          {item.jumlah}
+                        </td>
 
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex flex-row gap-4 justify-center text-white">
-                          <button
-                            className="text-center bg-indigo-600 hover:bg-indigo-800 rounded text-sm w-16 h-9"
-                            onClick={handleEditData}
-                          >
-                            EDIT
-                          </button>
-                          <button
-                            className="text-center bg-red-600 hover:bg-red-800 rounded text-sm w-16 h-9"
-                            onClick={handleDelete}
-                          >
-                            DELETE
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  );
-                })}
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex flex-row gap-4 justify-center text-white">
+                            <Link
+                              to={`/editdata/${item.id}`}
+                              className="text-center flex justify-center items-center bg-indigo-600 hover:bg-indigo-800 rounded text-sm w-16 h-9"
+                            >
+                              EDIT
+                            </Link>
+                            <button
+                              onClick={() => {
+                                deleteBarang(item.id);
+                              }}
+                              className="text-center bg-red-600 hover:bg-red-800 rounded text-sm w-16 h-9"
+                            >
+                              DELETE
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
               </tbody>
             </table>
           </div>
