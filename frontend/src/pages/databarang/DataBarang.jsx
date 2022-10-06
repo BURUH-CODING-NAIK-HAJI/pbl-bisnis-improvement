@@ -105,6 +105,14 @@ const DataBarang = () => {
                     ) {
                       return val;
                     }
+                    else if (
+                      val.jenis
+                        .toLowerCase()
+                        .includes(searchData.toLowerCase())
+                    ) {
+                      return val;
+                    }
+                    
                   })
                   .map((item, index) => {
                     return (
